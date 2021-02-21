@@ -75,38 +75,41 @@ function draw () {
 }
 
 function mousePressed() {
-    if (gameState.waiting) {
-        return; //will stop function
+  if (gameState.waiting) {
+    return; //will stop function
+  }
+  for (let k = 0; k < cards.length; k++) { // need a loop here, because no longer a single variable
+    //first check flipped cards length, and then we can trigger the flip
+    if (gameState.flippedCards.length < 2 && cards[k].didHit(mouseX, mouseY)) { //did hit method built into class; making sure only two cards will flip at a time
+
+      console.log('flipped', cards[k]); // flip also built into class
+      gameState.flippedCards.push(cards[k]);
     }
-    for (let k = 0; k < cards.length; k++) { // need a loop here, because no longer a single variable
-        //first check flipped cards length, and then we can trigger the flip
-        if (gameState.flippedCards.length < 2 && cards[k].didHit(mouseX, mouseY)) { //did hit method built into class; making sure only two cards will flip at a time
-            console.log('flipped', cards[k]); // flip also built into class
-            gameState.flippedCards.push(cards[k]);
-        }
+  }
+
+  if (gameState.flippedCards.length === 2) { //once 2 cards are flipped up..
+    gameState.attempts++;
+    if (gameState.flippedCards[0].cardFaceImg === gameState.flippedCards[1].cardFaceImg) {
+      // IF THEY MATCH:
+      // mark cards as matched so they don't flip back
+      gameState.flippedCards[0].isMatch = true;
+      gameState.flippedCards[1].isMatch = true;
+      // empty the flipped cards array
+      gameState.flippedCards.length = 0; //empty the array, ready for next set
+      // increment the score
+      gameState.numMatched++; //score
+      loop();
+    } else {
+      // IF THEY DONT MATCh:
+      gameState.waiting = true;
+      const loopTimeout = window.setTimeout(() => {
+        loop();
+        window.clearTimeout(loopTimeout);
+        console.log('started loop and clearing timeout')
+      }, 1000)
     }
-}
-    if (gameState.flippedCards.length === 2) { //once 2 cards are flipped up..
-        gameState.attempts++;
-        if (gameState.flippedCards[0].cardFaceImg === gameState.flippedCards[1].cardFaceImg) {
-            // IF THEY MATCH:
-            // mark cards as matched so they don't flip back
-            gameState.flippedCards[0].isMatch = true;
-            gameState.flippedCards[1].isMatch = true;
-           // empty the flipped cards array
-            gameState.flippedCards.length = 0; //empty the array, ready for next set
-            // increment the score
-            gameState.numMatched++; //score
-            loop();
-        } else {
-            // IF THEY DONT MATCh:
-            gameState.waiting = true;
-            const loopTimeout = window.setTimeout(() => {
-                loop();
-                window.clearTimeout(loopTimeout);
-            }, 1000)
-    }
-}
+  }
+} // this curly bracket was in the wrong place so the if condition wasn't occurring
 
 class Card {
     constructor (x, y, cardFaceImg) { // x and y parameters to change positions
